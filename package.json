@@ -1,0 +1,28 @@
+{
+  "name": "tgsqlite",
+  "description": "Telegram dump SQLite importer",
+  "version": "0.1.0",
+  "author": "Lapo Luchini <lapo@lapo.it>",
+  "dependencies": {
+    "sqlite": "^3.0.0"
+  },
+  "eslintConfig": {
+    "env": {
+      "node": true,
+      "es6": true
+    },
+    "parserOptions": {
+      "ecmaVersion": 2017
+    },
+    "extends": "eslint:recommended",
+    "rules": {
+      "strict": [ "error", "global" ],
+      "indent": [ "error", 4 ],
+      "linebreak-style": [ "error", "unix" ],
+      "quotes": [ "warn", "single" ],
+      "semi": [ "warn", "always" ],
+      "comma-dangle": [ "error", "always-multiline" ],
+      "no-console": "off"
+    }
+  }
+}
