@@ -1,8 +1,17 @@
 {
   "name": "tgsqlite",
+  "version": "0.1.1",
   "description": "Telegram dump SQLite importer",
-  "version": "0.1.0",
+  "main": "asn1.js",
+  "keywords": [ "telegram", "sqlite" ],
   "author": "Lapo Luchini <lapo@lapo.it>",
+  "license": "ISC",
+  "homepage": "https://github.com/lapo-luchini/tgsqlite/",
+  "bugs": { "url": "https://github.com/lapo-luchini/tgsqlite/issues" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lapo-luchini/tgsqlite.git"
+  },
   "dependencies": {
     "sqlite": "^3.0.0"
   },
