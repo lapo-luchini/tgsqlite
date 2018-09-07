@@ -3,7 +3,7 @@ tgsqlite
 
 Import your JSON Telegram backup into a SQLite database.
 
-Run with `node --max-old-space-size=8192 --optimize-for-size index.js PATH_TO/result.json`.
+Run with `node --max-old-space-size=8192 --optimize-for-size import.js PATH_TO/result.json`.
 
 ISC license
 -----------
