@@ -1,9 +1,9 @@
-#!/usr/bin/env node --max-old-space-size=8192 --optimize-for-size
+#!/usr/bin/env node --optimize-for-size
 'use strict';
 const
     fs = require('fs'),
-    sqlite = require('sqlite'),
-    dateMissing = Number.MAX_SAFE_INTEGER;
+    JSONStream = require('JSONStream'),
+    sqlite = require('sqlite');
 
 if (process.argv.length < 3) {
     console.log('specify path to result.json file');
@@ -23,21 +23,17 @@ Promise.resolve(
     for (const sql of fs.readFileSync('schema.sql', 'utf8').replace(/^--.*$/gm, '').trim().split(/;\s+/))
         await db.run(sql);
     await db.run('PRAGMA foreign_keys = ON');
-    const chats = JSON.parse(fs.readFileSync(process.argv[2], 'utf8')).chats;
-    chats.forEach(c => { // calculate age from first message
-        if (c.messages.length)
-            c.date = unixtime(c.messages[0].date);
-    });
-    chats.sort((a, b) => { // sort chats by age
-        return (a.date || dateMissing) - (b.date || dateMissing);
-    });
     const userId = {};
     const setUser = await db.prepare('INSERT INTO user (name) VALUES (?)');
     const setMessage = await db.prepare('INSERT INTO message (id, chat, type, date, edited, author, reply, text) VALUES (?,?,?,?,?,?,?,?)');
     const setChat = await db.prepare('INSERT INTO chat (name, type, date, num) VALUES (?,?,?,?)');
     const reSpace = /_(supergroup|channel)$/; // these messages use a separated numbering space
     let space = 0;
-    for (const chat of chats) {
+    const parser = JSONStream.parse('chats.*');
+    parser.on('data', async chat => {
+        parser.pause(); // using async, we're terminating right away so we must pause or the next even would arrive
+        if (chat.messages.length)
+            chat.date = unixtime(chat.messages[0].date);
         chat.id = (await setChat.run(chat.name, chat.type, chat.date, chat.messages.length)).lastID;
         console.log('Chat:', {id: chat.id, name: chat.name, type: chat.type, len: chat.messages.length});
         let offset = 0;
@@ -66,7 +62,9 @@ Promise.resolve(
                 JSON.stringify(m.text));
         }
         await db.run('COMMIT');
-    }
+        parser.resume();
+    });
+    fs.createReadStream(process.argv[2], 'utf8').pipe(parser);
     // gives error: SQLITE_CANTOPEN: unable to open database file
     // await db.run('VACUUM');
 }).catch(err => {
