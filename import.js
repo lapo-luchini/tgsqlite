@@ -38,10 +38,10 @@ Promise.resolve(
         console.log('Chat:', {id: chat.id, name: chat.name, type: chat.type, len: chat.messages.length});
         let offset = 0;
         if (reSpace.test(chat.type)) {
-            // I assume 1E10 messages per space will be enough
-            // (this allows for 900718 spaces = Number.MAX_SAFE_INTEGER / 1E10)
+            // I assume 1e10 messages per space will be enough
+            // (this allows for 900718 spaces = Number.MAX_SAFE_INTEGER / 1e10)
             ++space;
-            offset = space * 1E10;
+            offset = space * 1e10;
         }
         await db.run('BEGIN');
         for (const m of chat.messages) {
