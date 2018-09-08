@@ -9,7 +9,6 @@ CREATE TABLE user (
     id INTEGER PRIMARY KEY,
     name TEXT
 );
-CREATE INDEX user_name ON user (name); -- used to find existing users during import
 CREATE TABLE message (
     id INTEGER PRIMARY KEY,
     chat INTEGER,
