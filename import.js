@@ -29,7 +29,7 @@ Promise.resolve(
     const setChat = await db.prepare('INSERT INTO chat (name, type, date, num) VALUES (?,?,?,?)');
     const reSpace = /_(supergroup|channel)$/; // these messages use a separated numbering space
     let space = 0;
-    const parser = JSONStream.parse('chats.*');
+    const parser = JSONStream.parse('chats.list.*');
     parser.on('data', async chat => {
         parser.pause(); // using async, we're terminating right away so we must pause or the next even would arrive
         if (chat.messages.length)
