@@ -65,8 +65,12 @@ Promise.resolve(
         parser.resume();
     });
     fs.createReadStream(process.argv[2], 'utf8').pipe(parser);
-    // gives error: SQLITE_CANTOPEN: unable to open database file
-    // await db.run('VACUUM');
+    await new Promise((resolve, reject) => {
+        parser.on('finish', resolve);
+        parser.on('error', reject);
+    });
+    console.log('Final vacuum.');
+    await db.run('VACUUM'); 
 }).catch(err => {
     console.log(err.stack);
 });
