@@ -31,7 +31,7 @@ Promise.resolve(
     let space = 0;
     const parser = JSONStream.parse('chats.list.*');
     parser.on('data', async chat => {
-        parser.pause(); // using async, we're terminating right away so we must pause or the next even would arrive
+        parser.pause(); // using async, we're terminating right away so we must pause or the next 'data' event would arrive
         if (chat.messages.length)
             chat.date = unixtime(chat.messages[0].date);
         chat.id = (await setChat.run(chat.name, chat.type, chat.date, chat.messages.length)).lastID;
