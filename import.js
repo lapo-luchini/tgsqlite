@@ -9,6 +9,7 @@ if (process.argv.length < 3) {
     console.log('specify path to result.json file');
     process.exit(1);
 }
+const filename = process.argv[2];
 
 function unixtime(str) {
     return Date.parse(str) / 1000;
@@ -64,10 +65,14 @@ Promise.resolve(
         await db.run('COMMIT');
         parser.resume();
     });
-    fs.createReadStream(process.argv[2], 'utf8').pipe(parser);
     await new Promise((resolve, reject) => {
-        parser.on('finish', resolve);
+        parser.on('end', resolve);
         parser.on('error', reject);
+        if (filename == '-') {
+            process.stdin.setEncoding('utf8');
+            process.stdin.pipe(parser);
+        } else
+            fs.createReadStream(filename, 'utf8').pipe(parser);
     });
     console.log('Final vacuum.');
     await db.run('VACUUM'); 
