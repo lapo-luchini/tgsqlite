@@ -19,7 +19,7 @@ if (fs.existsSync('telegram.sqlite'))
 Promise.resolve(
 ).then(() => sqlite.open('telegram.sqlite', { Promise })
 ).then(async db => {
-    await db.run('PRAGMA page_size = 32768');
+    await db.run('PRAGMA page_size = 32768'); // smallest database size
     for (const sql of fs.readFileSync('schema.sql', 'utf8').replace(/^--.*$/gm, '').trim().split(/;\s+/))
         await db.run(sql);
     await db.run('PRAGMA foreign_keys = ON');
