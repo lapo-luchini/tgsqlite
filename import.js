@@ -57,7 +57,7 @@ Promise.resolve(
             await setMessage.run(m.id + offset, chat.id,
                 (m.type == 'message') ? null : m.type,
                 unixtime(m.date),
-                m.edited.startsWith(1970) ? null : unixtime(m.edited),
+                m.edited.startsWith('1970') ? null : unixtime(m.edited),
                 author,
                 m.reply_to_message_id,
                 JSON.stringify(m.text));
