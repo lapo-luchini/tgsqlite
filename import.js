@@ -27,7 +27,7 @@ Promise.resolve(
     const userId = {};
     const setUser = await db.prepare('INSERT INTO user (name) VALUES (?)');
     const setMessage = await db.prepare('INSERT INTO message (id, chat, type, date, edited, author, reply, text) VALUES (?,?,?,?,?,?,?,?)');
-    const setChat = await db.prepare('INSERT INTO chat (name, type, date, num) VALUES (?,?,?,?)');
+    const setChat = await db.prepare('INSERT INTO chat (id, name, type, date, num) VALUES (?, ?,?,?,?)');
     const reSpace = /_(supergroup|channel)$/; // these messages use a separated numbering space
     let space = 0;
     const parser = JSONStream.parse('chats.list.*');
@@ -35,7 +35,7 @@ Promise.resolve(
         parser.pause(); // using async, we're terminating right away so we must pause or the next 'data' event would arrive
         if (chat.messages.length)
             chat.date = unixtime(chat.messages[0].date);
-        chat.id = (await setChat.run(chat.name, chat.type, chat.date, chat.messages.length)).lastID;
+        await setChat.run(chat.id, chat.name, chat.type, chat.date, chat.messages.length);
         console.log('Chat:', {id: chat.id, name: chat.name, type: chat.type, len: chat.messages.length});
         let offset = 0;
         if (reSpace.test(chat.type)) {
