@@ -8,7 +8,7 @@ Run with `node --optimize-for-size import.js PATH_TO/result.json`.
 ISC license
 -----------
 
-Telegram dump SQLite importer Copyright (c) 2018 Lapo Luchini <lapo@lapo.it>
+Telegram dump SQLite importer Copyright (c) 2018-2019 Lapo Luchini <lapo@lapo.it>
 
 Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
 
