@@ -6,7 +6,7 @@ const
     sqlite = require('sqlite');
 
 if (process.argv.length < 3) {
-    console.log('specify path to result.json file');
+    console.log('specify path to result.json file (or "-" for stdin)');
     process.exit(1);
 }
 const filename = process.argv[2];
