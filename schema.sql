@@ -17,7 +17,7 @@ CREATE TABLE message (
     edited INTEGER, -- is NULL when dump contains year 1970
     author INTEGER, -- "from" field (can be null in the dump)
     reply INTEGER, -- "reply_to_message_id" field
-    text TEXT NOT NULL, -- in JSON as it can contain formatting
+    text TEXT NOT NULL, -- in JSON format as it can contain formatting
     FOREIGN KEY (chat) REFERENCES chat (id),
     FOREIGN KEY (author) REFERENCES user (id)
 );
