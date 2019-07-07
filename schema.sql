@@ -10,7 +10,7 @@ CREATE TABLE user (
     name TEXT
 );
 CREATE TABLE message (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY, -- using a compound (chat, id) primary key would use more space, so we use a trick to disambiguate ids in supergroups
     chat INTEGER NOT NULL,
     type TEXT, -- NULL for the default "message" type
     date INTEGER NOT NULL,
