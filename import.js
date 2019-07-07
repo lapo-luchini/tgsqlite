@@ -98,7 +98,7 @@ class AsyncTransform extends Transform {
                 unixtime(m.date),
                 m.edited.startsWith('1970') ? null : unixtime(m.edited),
                 author,
-                m.reply_to_message_id,
+                m.reply_to_message_id + offset,
                 JSON.stringify(m.text));
         }
         await db.run('COMMIT');
