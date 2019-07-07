@@ -73,6 +73,20 @@ class AsyncTransform extends Transform {
         }
         await db.run('BEGIN');
         for (const m of chat.messages) {
+            if (m.type == 'service') {
+                // store service metadata in text field
+                const m2 = Object.assign({}, m);
+                delete m2.id;
+                delete m2.type;
+                delete m2.date;
+                delete m2.edited;
+                delete m2.actor;
+                delete m2.actor_id;
+                delete m2.text;
+                m.from = m.actor;
+                m.from_id = m.actor_id;
+                m.text = m2;
+            }
             const author = m.from_id;
             if (!(author in userId)) {
                 await setUser.run(author, m.from);
