@@ -2,6 +2,7 @@
 'use strict';
 const
     fs = require('fs'),
+    Transform = require('stream').Transform,
     JSONStream = require('JSONStream'),
     sqlite = require('sqlite');
 
@@ -9,29 +10,56 @@ if (process.argv.length < 3) {
     console.log('specify path to result.json file (or "-" for stdin)');
     process.exit(1);
 }
-const filename = process.argv[2];
+
+function getInput() {
+    const filename = process.argv[2];
+    if (filename == '-') {
+        process.stdin.setEncoding('utf8');
+        return process.stdin;
+    } else
+        return fs.createReadStream(filename, 'utf8');
+}
 
 function unixtime(str) {
     return Date.parse(str) / 1000;
 }
 
-if (fs.existsSync('telegram.sqlite'))
-    fs.unlinkSync('telegram.sqlite');
+function streamEnd(stream) {
+    return new Promise((resolve, reject) => {
+        stream.on('end', resolve);
+        stream.on('error', reject);
+    });
+}
+
+class AsyncTransform extends Transform {
+    constructor(func) {
+        super({
+            objectMode: true,
+            transform(chunk, encoding, callback) {
+                func(chunk).then(
+                    result => { callback(null, result); },
+                    error => { callback(error); }
+                );
+            },
+        });
+    }
+}
+
 (async () => {
+    if (fs.existsSync('telegram.sqlite'))
+        fs.unlinkSync('telegram.sqlite');
     const db = await sqlite.open('telegram.sqlite', { Promise });
     await db.run('PRAGMA page_size = 32768'); // smallest database size
     for (const sql of fs.readFileSync('schema.sql', 'utf8').replace(/^--.*$/gm, '').trim().split(/;\s+/))
         await db.run(sql);
     await db.run('PRAGMA foreign_keys = ON');
     const userId = {};
-    const setUser = await db.prepare('INSERT INTO user (name) VALUES (?)');
+    const setUser = await db.prepare('INSERT INTO user (id, name) VALUES (?,?)');
     const setMessage = await db.prepare('INSERT INTO message (id, chat, type, date, edited, author, reply, text) VALUES (?,?,?,?,?,?,?,?)');
     const setChat = await db.prepare('INSERT INTO chat (id, name, type, date, num) VALUES (?, ?,?,?,?)');
     const reSpace = /_(supergroup|channel)$/; // these messages use a separated numbering space
     let space = 0;
-    const parser = JSONStream.parse('chats.list.*');
-    parser.on('data', async chat => {
-        parser.pause(); // using async, we're terminating right away so we must pause or the next 'data' event would arrive
+    async function myParse(chat) {
         if (chat.messages.length)
             chat.date = unixtime(chat.messages[0].date);
         await setChat.run(chat.id, chat.name, chat.type, chat.date, chat.messages.length);
@@ -62,17 +90,11 @@ if (fs.existsSync('telegram.sqlite'))
                 JSON.stringify(m.text));
         }
         await db.run('COMMIT');
-        parser.resume();
-    });
-    await new Promise((resolve, reject) => {
-        parser.on('end', resolve);
-        parser.on('error', reject);
-        if (filename == '-') {
-            process.stdin.setEncoding('utf8');
-            process.stdin.pipe(parser);
-        } else
-            fs.createReadStream(filename, 'utf8').pipe(parser);
-    });
+    }
+    const stream = getInput(
+    ).pipe(JSONStream.parse('chats.list.*')
+    ).pipe(new AsyncTransform(myParse));
+    await streamEnd(stream);
     console.log('Final vacuum.');
     await db.run('VACUUM'); 
 })().catch(err => {
