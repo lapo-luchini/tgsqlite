@@ -73,14 +73,12 @@ class AsyncTransform extends Transform {
         }
         await db.run('BEGIN');
         for (const m of chat.messages) {
-            let author = m.from;
-            if (author) {
-                author = userId[m.from];
-                if (!author) {
-                    let st = await setUser.run(m.from);
-                    userId[m.from] = author = st.lastID;
-                }
-            }
+            const author = m.from_id;
+            if (!(author in userId)) {
+                await setUser.run(author, m.from);
+                userId[author] = m.from;
+            } else if (userId[author] != m.from)
+                throw new Error('Different user name: ' + userId[author] + ' ≠ ' + m.from);
             await setMessage.run(m.id + offset, chat.id,
                 (m.type == 'message') ? null : m.type,
                 unixtime(m.date),

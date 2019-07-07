@@ -7,7 +7,7 @@ CREATE TABLE chat (
 );
 CREATE TABLE user (
     id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL
+    name TEXT
 );
 CREATE TABLE message (
     id INTEGER PRIMARY KEY,
